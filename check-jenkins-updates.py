@@ -51,16 +51,17 @@ def main():
     # check for version change
     if previous_check['version'] != current_json['core']['version']:
         output = "version change detected: {} -> {}".format(previous_check['version'], current_json['core']['version'])
+        subject = "new Jenkins release is available: {}".format(current_json['core']['version'])
         if DEBUG: print output
-        send_email(output)
+        send_email(subject, output)
         if DEBUG: print "email sent!"
     else:
         if DEBUG: print "latest version has not changed (is: {})".format(current_json['core']['version'])
 
 
-def send_email(msg_text):
+def send_email(msg_subject, msg_text):
     msg = MIMEText(msg_text)
-    msg['Subject'] = "New Jenkins release is available"
+    msg['Subject'] = msg_subject
     msg['From'] = CHECK_JENKINS_UPDATES_FROM
     msg['To'] = ','.join(CHECK_JENKINS_UPDATES_RECIPIENT)
 
