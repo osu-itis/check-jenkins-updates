@@ -4,8 +4,8 @@ A python script that checks for new Jenkins releases and sends email accordingly
 
 ## Requirements
 
-* Python 2.7.x
-* [Requests](http://docs.python-requests.org/) >= 2.20.x
+* Python 3.8+
+* [Requests](http://docs.python-requests.org/)
 
 ## Configuration
 
