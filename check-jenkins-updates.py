@@ -1,15 +1,16 @@
-import requests
 import json
-import re
 import os
-import sys
+import re
 import smtplib
+import sys
 from email.mime.text import MIMEText
+
+import requests
 
 # get variables from environment
 CHECK_JENKINS_UPDATES_SOURCE = os.getenv(
     'CHECK_JENKINS_UPDATES_SOURCE',
-    'http://updates.jenkins-ci.org/update-center.json')
+    'http://updates.jenkins-ci.org/stable/update-center.json')
 CHECK_JENKINS_UPDATES_SMTP = os.getenv(
     'CHECK_JENKINS_UPDATES_SMTP',
     'localhost')
@@ -85,6 +86,8 @@ def send_email(msg_subject, msg_text):
     msg['From'] = CHECK_JENKINS_UPDATES_FROM
     msg['To'] = ','.join(CHECK_JENKINS_UPDATES_RECIPIENT)
 
+    if DEBUG: print(f"sending email via mailserver "
+                    f"{CHECK_JENKINS_UPDATES_SMTP}")
     s = smtplib.SMTP(CHECK_JENKINS_UPDATES_SMTP)
     s.sendmail(CHECK_JENKINS_UPDATES_FROM, CHECK_JENKINS_UPDATES_RECIPIENT,
                msg.as_string())
