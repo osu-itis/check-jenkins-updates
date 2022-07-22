@@ -5,6 +5,7 @@ import smtplib
 import sys
 from email.mime.text import MIMEText
 
+import backoff
 import requests
 
 # get variables from environment
@@ -23,6 +24,9 @@ CHECK_JENKINS_UPDATES_RECIPIENT = os.getenv(
 CHECK_JENKINS_UPDATES_CACHE = os.getenv(
     'CHECK_JENKINS_UPDATES_CACHE',
     '/tmp/check_jenkins_version.cache')
+CHECK_JENKINS_UPDATES_RETRY_TIMEOUT = int(os.getenv(
+    'CHECK_JENKINS_UPDATES_RETRY_TIMEOUT',
+    '120'))
 if os.getenv('CHECK_JENKINS_UPDATES_DEBUG', '0') == '1':
     DEBUG = True
 else:
@@ -54,7 +58,7 @@ def main():
         }
 
     # get current version details from update source
-    r = requests.get(CHECK_JENKINS_UPDATES_SOURCE)
+    r = get_current_versions(CHECK_JENKINS_UPDATES_SOURCE)
     try:
         raw_json = re.search('\n(.*?)\n', r.text).group(1)
     except AttributeError:
@@ -79,6 +83,11 @@ def main():
         if DEBUG: print(f"latest version has not changed (is: "
                         f"{current_json['core']['version']})")
 
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.ConnectionError,
+                      max_time=CHECK_JENKINS_UPDATES_RETRY_TIMEOUT)
+def get_current_versions(url):
+    return requests.get(CHECK_JENKINS_UPDATES_SOURCE)
 
 def send_email(msg_subject, msg_text):
     msg = MIMEText(msg_text)
